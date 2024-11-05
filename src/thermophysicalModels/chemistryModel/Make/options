@@ -1,0 +1,17 @@
+EXE_INC = \
+    -I$(LIB_rfFoam8_SRC)/thermophysicalModels/reactionThermo/lnInclude \
+    -I$(LIB_rfFoam8_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_rfFoam8_SRC)/thermophysicalModels/specie/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/functions/Polynomial \
+    -I$(LIB_rfFoam8_SRC)/ODE/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude
+
+LIB_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lfluidThermophysicalModels \
+    -lreactionThermophysicalModels \
+    -lspecie \
+    -lODE \
+    -lfiniteVolume \
+    -lmeshTools

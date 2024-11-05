@@ -1,0 +1,246 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2011-2020 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+
+Class
+    Foam::PRchungTakaMixture
+
+Description
+    Foam::PRchungTakaMixture
+
+    calculate real gas properties based on new mixture model
+    that can account for various mixing rules:
+       EoS          : PR 
+       thermodynamic: rfJanaf
+       transport    : ChungTaka
+
+    by:      
+    Nam Danh Nguyen - PhD.st
+    Advisor: Prof. Chun Sang Yoo 
+    Combustion & Propulsion Lab - Dept. of Mech. Engineering
+    Ulsan Institute of Science and Technology (UNIST) - Korea
+
+
+SourceFiles
+    PRchungTakaMixture.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef PRchungTakaMixture_H
+#define PRchungTakaMixture_H
+
+#include "basicSpecieMixture.H"
+#include "HashPtrTable.H"
+#include "specieElement.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                    Class PRchungTakaMixture Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class ThermoType>
+class PRchungTakaMixture
+:
+    public basicSpecieMixture
+{
+    // Private Data
+
+        //- List of specie thermo
+        PtrList<ThermoType> specieThermos_;
+
+        typedef HashTable<List<specieElement>> speciesCompositionTable;
+
+        //- Table of species composition
+        speciesCompositionTable speciesComposition_;
+
+        //- Temporary storage for the cell/face mixture thermo data
+        mutable ThermoType mixture_;
+
+        //- Temporary storage for the volume weighted
+        //  cell/face mixture thermo data
+        mutable ThermoType mixtureVol_;
+
+        // - Number of species - Nam 
+        label numberOfSpecies_;
+
+
+    // Private Member Functions
+
+        //- Read the species data from the given dictionary and return
+        PtrList<ThermoType> readSpeciesData(const dictionary& thermoDict) const;
+
+        //- Read the species composition from the given dictionary and return
+        speciesCompositionTable readSpeciesComposition
+        (
+            const dictionary& thermoDict,
+            const speciesTable& speciesTable_
+        ) const;
+
+        //- Correct the mass fractions to sum to 1
+        void correctMassFractions();
+
+        //- Calculate parameters/coefficients in real-fluid models
+        void calculateRealGas
+        (
+	    List<scalar> X,
+	    scalar& bM,
+	    scalar& coef1,
+	    scalar& coef2,
+	    scalar& coef3,
+	    scalar& sigmaM,
+	    scalar& epsilonkM,
+	    scalar& MM,
+	    scalar& VcM,
+	    scalar& TcM,
+	    scalar& omegaM, 
+	    scalar& miuiM,
+	    scalar& kappaiM
+        ) const;  
+
+protected:
+
+     //- Members to store precalculations in real-fluid models
+        //- List of species molecular weight
+        List<scalar> ListW_;
+        //- For PR
+        List<scalar> BM_;
+        List<List<scalar>> COEF1_;
+        List<List<scalar>> COEF2_;
+        List<List<scalar>> COEF3_; 
+        //- For viscosity and thermal conductivity in Chung's model
+        List<List<scalar>> SIGMA3M_;
+        List<List<scalar>> EPSILONKM0_;
+        List<List<scalar>> OMEGAM0_;
+        List<List<scalar>> MM0_;
+        List<List<scalar>> MIUIM0_;
+        List<List<scalar>> KAPPAIM_;
+        //- For mass diffusivity in Takahashi's correction
+        List<scalar> ListTc_;
+        List<scalar> ListPc_;
+        List<List<scalar>> MMD_;
+        List<List<scalar>> SIGMD_;
+        //Nam
+      
+public:
+
+    //- The type of thermodynamics this mixture is instantiated for
+    typedef ThermoType thermoType;
+
+
+    // Constructors
+
+        //- Construct from dictionary, mesh and phase name
+        PRchungTakaMixture(const dictionary&, const fvMesh&, const word&);
+
+        //- Disallow default bitwise copy construction
+        PRchungTakaMixture
+        (
+            const PRchungTakaMixture<ThermoType>&
+        ) = delete;
+
+
+    //- Destructor
+    virtual ~PRchungTakaMixture()
+    {}
+
+
+    // Member Functions
+
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "PRchungTakaMixture<" + ThermoType::typeName() + '>';
+        }
+
+        //- Return the raw specie thermodynamic data
+        const PtrList<ThermoType>& specieThermos() const
+        {
+            return specieThermos_;
+        }
+
+        //- Return the table of species composition
+        const speciesCompositionTable& specieComposition() const
+        {
+            return speciesComposition_;
+        }
+
+        const ThermoType& cellMixture(const label celli) const;
+
+        const ThermoType& patchFaceMixture
+        (
+            const label patchi,
+            const label facei
+        ) const;
+
+        const ThermoType& cellVolMixture
+        (
+            const scalar p,
+            const scalar T,
+            const label celli
+        ) const;
+
+        const ThermoType& patchFaceVolMixture
+        (
+            const scalar p,
+            const scalar T,
+            const label patchi,
+            const label facei
+        ) const;
+
+        //- Read dictionary
+        void read(const dictionary&);
+
+        //- Return thermo based on index
+        inline const ThermoType& specieThermo(const label speciei) const
+        {
+            return specieThermos_[speciei];
+        }
+
+        // - Return the number of species in the mixture - Nam
+        inline const label& numberOfSpecies() const
+        {
+            return numberOfSpecies_;
+        }
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "PRchungTakaMixture.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

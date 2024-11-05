@@ -1,0 +1,6 @@
+EXE_INC = \
+    -I$(LIB_rfFoam8_SRC)/thermophysicalModels/specie/lnInclude
+
+LIB_LIBS = \
+    -L$(FOAM_USER_LIBBIN) \
+    -lspecie

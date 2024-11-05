@@ -1,0 +1,15 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+makeType=${1:-libso}
+set -x 
+
+# comment out all of this if want to keep obj. files of this ver. -----
+wclean ODE
+ ./thermophysicalModels/Allwclean
+ ./MomentumTransportModels/Allwclean
+ ./ThermophysicalTransportModels/Allwclean
+wclean radiationModels
+wclean combustionModels
+wclean fvOptions
+
+#------------------------------------------------------------------------------
