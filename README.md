@@ -70,7 +70,7 @@ where abbreviations of model names are:
 		source ~/.bashrc
 - To compile the library and applications, go to _realFluidThermophysicalModels-8_ directory and run the _Allwmake_ script:
 
-		cd ~/OpenFOAM/yourDirectory/realFluidThermophysicalModels-/
+		cd ~/OpenFOAM/yourDirectory/realFluidThermophysicalModels-8/
 		./Allwmake
 
 - Now the real-fluid based _thermophysicalModels_ library and _realFluidReactingFoam_ solver are ready to use. The library and solver are stored at _$FOAM_USER_LIBBIN_ and _$FOAM_USER_APPBIN_ directory.
