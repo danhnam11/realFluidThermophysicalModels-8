@@ -67,7 +67,9 @@ where abbreviations of model names are:
 - Specify the path of your _src_ directory to an environment variable, _LIB_REALFLUID8_SRC_. For example:
 
 		echo "export LIB_REALFLUID8_SRC=~/OpenFOAM/yourDirectory/realFluidThermophysicalModels-8/src/" >> ~/.bashrc
+        echo "export LIB_rfFoam8_SRC="$LIB_REALFLUID8_SRC"" >> ~/.bashrc
 		source ~/.bashrc
+  
 - To compile the library and applications, go to _realFluidThermophysicalModels-8_ directory and run the _Allwmake_ script:
 
 		cd ~/OpenFOAM/yourDirectory/realFluidThermophysicalModels-8/
@@ -100,3 +102,4 @@ This package was developed at Combustion & Propulsion Lab., Dept. of Mech. Engin
 - [4] T. C. Horng, M. Ajlan, L. L. Lee, K. E. Starling, M. Ajlan, Generalized multiparameter correlation for nonpolar and polar fluid transport properties, Ind. Eng. Chem. Res. 27 (1988) 671-679.
 - [5] S. Takahashi, S. Takahashi, Preparation of a generalized chart for the diffusion coefficients of gases at high pressures, J. Chem. Eng. Japan 7 (1975) 417-420. 
 - [6] R. J. Kee, F. M. Rupley, E. Meeks, J. A. Miller, CHEMKIN-III: a fortran chemical kinetics package for the analysis of gas-phase chemical and plasma kinetics, SAND96-8216 (1996). 
+
