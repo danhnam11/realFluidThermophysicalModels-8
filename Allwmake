@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 src/Allwmake $targetType $*
 
-wmake $targetType applications/solvers/reactingFoam
-wmake $targetType applications/solvers/realFluidReactingFoam
+wmake applications/solvers/reactingFoam
+wmake applications/solvers/realFluidReactingFoam
 
 #------------------------------------------------------------------------------
